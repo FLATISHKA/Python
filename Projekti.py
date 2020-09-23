@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import messagebox
 import tkinter.font as font
+import sqlite3
+from tkinter import messagebox
 
 main = Tk()
 main.title("Account")
@@ -31,15 +33,14 @@ drop.config(width=7)
 drop['font'] = myFont
 drop.grid(row=1, column=2, padx= 3)
 
-myButton = Button(main, text="    Hae    ", command=show)
+myButton = Button(main, text="Hae", command=show, width=7)
 myButton['font'] = myFont
 myButton.grid(row=1, column=3, padx=3)
 
 def register():
-    global reg
 
     reg = Toplevel()
-    reg.geometry('300x250')
+    reg.geometry('300x200')
     reg.title("Register")
 
     Label(reg, text="Username", font="Arial 15").pack()
@@ -49,10 +50,16 @@ def register():
     Label(reg, text="Password", font="Arial 15").pack()
     Password = Entry(reg, width = 25, show="*")
     Password.pack()
+
+    Button(reg, text="Log in").pack(pady=7)
+
+
     
 
 openWindowButton = Button(main, text="Register", command=register, width=15, font="Arial 20")
 openWindowButton['font'] = myFont
 openWindowButton.grid(row=4, column=2, columnspan= 2, padx=10, pady=10)
+
+
 
 main.mainloop()
