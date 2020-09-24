@@ -10,55 +10,134 @@ main.title("Account")
 # define font
 myFont = font.Font(family='Arial', size=20)
 
-labelTop = Label(main, text="Valitse käyttäjä")
+labelTop = Label(main, text=":D")
 labelTop['font'] = myFont
-labelTop.grid(row=0, column=2, columnspan=2, pady=5)
+labelTop.pack()
 
-options=[
-    "First",
-    "Second",
-    "Third",
-    "Fourth",
-    "Fifth",
-]
+def query():
+    conn = sqlite3.connect('data.db')
 
-selectItem = StringVar()
-selectItem.set(options[0])
+    c = conn.cursor()
 
-def show():
-    myLabel=Label(main, text=selectItem.get().pack)
+    c.execute("SELECT * FROM accounts")
+    records=c.fetchall()
 
-drop = OptionMenu(main, selectItem, *options)
-drop.config(width=7)
-drop['font'] = myFont
-drop.grid(row=1, column=2, padx= 3)
+    print_records = ""
 
-myButton = Button(main, text="Hae", command=show, width=7)
-myButton['font'] = myFont
-myButton.grid(row=1, column=3, padx=3)
+    for record in records:
+        print_records += str(record[0]) + " \t " + str(record[1]) + "\n"
 
-def register():
+    print(print_records)
 
-    reg = Toplevel()
-    reg.geometry('300x200')
-    reg.title("Register")
-
-    Label(reg, text="Username", font="Arial 15").pack()
-    Username = Entry(reg, width = 25)
-    Username.pack()
-
-    Label(reg, text="Password", font="Arial 15").pack()
-    Password = Entry(reg, width = 25, show="*")
-    Password.pack()
-
-    Button(reg, text="Log in").pack(pady=7)
+    conn.commit()
+    conn.close()
 
 
+def login():
+    with sqlite3.connect('data.db') as db:
+        c = db.cursor()
     
+    find_user=("SELECT * FROM accounts where username=? and password = ?")
+    c1.execute(find_user,[(username.get()), (password.get())])
+    result = c.fetchall()
+    if result:
+        messagebox.showinfo('Success', 'you are in!')
+    else:
+        messagebox.showinfo('Error', 'the account does not exist.')
 
-openWindowButton = Button(main, text="Register", command=register, width=15, font="Arial 20")
+def login_ui():
+    global username
+    global password
+
+    log = Toplevel()
+    log.geometry('300x200')
+    log.title("LogIn Form")
+    username = StringVar()
+    password = StringVar()
+
+    label_username = Label(log, text="Username", font="Arial 15")
+    label_username.pack()
+    entry_username = Entry(log, textvariable=username, width = 25)
+    entry_username.pack()
+
+    label_username= Label(log, text="Password", font="Arial 15")
+    label_username.pack()
+    entry_password = Entry(log, textvariable=password, width = 25, show="*")
+    entry_password.pack()
+
+    Button(log, text="Log In", command=login,).pack(pady=7)
+    Button(log, text="Accounts", command=query).pack()
+
+openWindowButton = Button(main, text="Log In", command=login_ui, width=15, font="Arial 20")
 openWindowButton['font'] = myFont
-openWindowButton.grid(row=4, column=2, columnspan= 2, padx=10, pady=10)
+openWindowButton.pack(padx=5)
+
+with sqlite3.connect('data.db') as db1:
+    c1 = db1.cursor()
+
+c1.execute("create table if not exists accounts(username text not null, password text not null)")
+
+def singup():
+    print(n_username.get(),"\n",n_password.get())
+    with sqlite3.connect('data.db') as db1:
+        c1 = db1.cursor()
+    
+    find_user=("SELECT * FROM accounts where username=?")
+    c1.execute(find_user,[(n_username.get())])
+    if c1.fetchall():
+        messagebox.showinfo('user','already available')
+        print("error")
+    else:
+        print("Success")
+
+        c1.execute("INSERT INTO accounts VALUES (:username, :password)",
+            {
+                'username' : n_username.get(),
+                'password' : n_password.get()
+            }
+        )
+        c1.commit()
+
+        c1.close()
+        #insert = 'INSERT INTO accounts(username, password)values(?, ?)'
+        
+        #c1.execute(insert,[(n_username.get()),(n_password.get())])
+        #try:
+        #    with sqlite3.connect('data.db') as db:
+        #        c = db.cursor()
+             
+        #    c.execute("create table user if not exists user(username text not null, primary key,password text not null)")
+        #    db.commit()
+        #    db.close()
+        #    db1.commit()
+        #except:
+        #    print("not processed")
+
+def signup_ui():
+    global n_username
+    global n_password
+    reg = Toplevel()
+
+    reg.geometry('300x200')
+    reg.title("SignUp Form")
+    n_username = StringVar()
+    n_password = StringVar()
+
+    label_username = Label(reg, text="Username", font="Arial 15")
+    label_username.pack()
+    entry_username = Entry(reg, textvariable=n_username, width = 25)
+    entry_username.pack()
+ 
+    label_password = Label(reg, text="Password", font="Arial 15")
+    label_password.pack()
+    entry_password = Entry(reg, textvariable=n_password, width = 25)
+    entry_password.pack()
+
+    Button(reg, text="Sign Up", command= singup).pack(pady=7)
+
+openWindowButton = Button(main, text="Sing Up", command=signup_ui, width=15, font="Arial 20")
+openWindowButton['font'] = myFont
+openWindowButton.pack(pady=7, padx=5)
 
 
 
