@@ -5,6 +5,7 @@ import sqlite3
 from tkinter import messagebox
 import random
 
+
 main = Tk()
 main.title("Account")
 
@@ -42,10 +43,14 @@ def login():
     c.execute(find_user,[(username.get()), (password.get())])
     result = c.fetchall()
     if result:
-        messagebox.showinfo('Success', 'you are in!')
+        IN = Label(log, text="You are in!", fg="green")
+        IN.pack()
         tasks()
+        IN.after(3000, IN.destroy)
     else:
-        messagebox.showinfo('Error', 'the account does not exist.')
+        OUT = Label(log, text="The account does not exist.", fg="red")
+        OUT.pack()
+        OUT.after(3000, OUT.destroy)
 
 def login_ui():
     global username
@@ -160,19 +165,30 @@ openWindowButton.pack(pady=7, padx=5)
 def tasks():
 
     global tasktext
+    global task
     task = Toplevel()
     
     tasktext = StringVar()
 
     task.geometry('400x300')
     task.title("Tasks")
-    Label(task, text = "Tasks", font="Arial 20").pack()
 
-    Entry(task, textvariable=tasktext).pack()
-    Button(task, text="Save", command=ExecuteTask).pack()
+    Button(task, text="Edit", command=edit).grid(row=1)
+    Label(task, text="-TASK NAME").grid(row=4, columnspan=6)
+    Label(task, text="TASK ENTRY").grid(row=5, columnspan=6)
 
+def edit():
+    Button(task, text="Save", command=SaveTask).grid(row=1, column=1)
+    Button(task, text="Delete").grid(row=1, column=2)
+    Button(task, text="Add Task", command=NewTask).grid(row=1, column=3)
 
-def ExecuteTask():
+def NewTask():
+    Label(task, text="Task Name:", pady=3).grid(row=2, columnspan=4)
+    Entry(task, width=25).grid(row=2, column=4)
+    Label(task, text="Task Entry:").grid(row=3, columnspan=4)
+    entry=Text(task, width=25, height=4)
+    entry.grid(row=3, column=4)
+def SaveTask():
         tasktext = StringVar()
         
         c.execute("INSERT INTO tasks VALUES (:task)",
