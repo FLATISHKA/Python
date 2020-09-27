@@ -3,6 +3,7 @@ from tkinter import messagebox
 import tkinter.font as font
 import sqlite3
 from tkinter import messagebox
+import random
 
 main = Tk()
 main.title("Account")
@@ -10,16 +11,16 @@ main.title("Account")
 # define font
 myFont = font.Font(family='Arial', size=20)
 
-labelTop = Label(main, text=":D")
+labelTop = Label(main, text="Task List")
 labelTop['font'] = myFont
 labelTop.pack()
 
-def query():
+def acco():
     conn = sqlite3.connect('data.db')
 
     c = conn.cursor()
 
-    c.execute("SELECT * FROM accounts")
+    c.execute("SELECT * FROM tasks")
     records=c.fetchall()
 
     print_records = ""
@@ -38,16 +39,18 @@ def login():
         c = db.cursor()
     
     find_user=("SELECT * FROM accounts where username=? and password = ?")
-    c1.execute(find_user,[(username.get()), (password.get())])
+    c.execute(find_user,[(username.get()), (password.get())])
     result = c.fetchall()
     if result:
         messagebox.showinfo('Success', 'you are in!')
+        tasks()
     else:
         messagebox.showinfo('Error', 'the account does not exist.')
 
 def login_ui():
     global username
     global password
+    global log
 
     log = Toplevel()
     log.geometry('300x200')
@@ -66,39 +69,54 @@ def login_ui():
     entry_password.pack()
 
     Button(log, text="Log In", command=login,).pack(pady=7)
-    Button(log, text="Accounts", command=query).pack()
+    Button(log, text="Accounts", command=acco).pack()
 
 openWindowButton = Button(main, text="Log In", command=login_ui, width=15, font="Arial 20")
 openWindowButton['font'] = myFont
 openWindowButton.pack(padx=5)
 
-with sqlite3.connect('data.db') as db1:
-    c1 = db1.cursor()
+with sqlite3.connect('data.db') as db:
+    c = db.cursor()
 
-c1.execute("create table if not exists accounts(username text not null, password text not null)")
+
+AccTable = '''CREATE TABLE if not exists accounts(
+        ID integer PRIMARY KEY,
+         username text not null,
+          password text not null
+          )'''
+
+TaskTable = '''CREATE TABLE if not exists tasks (
+        acctask integer NOT NULL,
+         FOREIGN KEY (acctask)
+          REFERENCES accounts(ID)
+          )'''
+
+c.execute(AccTable)
+c.execute(TaskTable)
+db.commit
 
 def singup():
     print(n_username.get(),"\n",n_password.get())
-    with sqlite3.connect('data.db') as db1:
-        c1 = db1.cursor()
+    with sqlite3.connect('data.db') as db:
+        c = db.cursor()
     
     find_user=("SELECT * FROM accounts where username=?")
-    c1.execute(find_user,[(n_username.get())])
-    if c1.fetchall():
+    c.execute(find_user,[(n_username.get())])
+    if c.fetchall():
         messagebox.showinfo('user','already available')
         print("error")
     else:
         print("Success")
-
-        c1.execute("INSERT INTO accounts VALUES (:username, :password)",
+        
+        c.execute("INSERT INTO accounts VALUES (:username, :password)",
             {
                 'username' : n_username.get(),
                 'password' : n_password.get()
             }
         )
-        c1.commit()
-
-        c1.close()
+        
+        db.commit()
+        db.close()
         #insert = 'INSERT INTO accounts(username, password)values(?, ?)'
         
         #c1.execute(insert,[(n_username.get()),(n_password.get())])
@@ -139,6 +157,30 @@ openWindowButton = Button(main, text="Sing Up", command=signup_ui, width=15, fon
 openWindowButton['font'] = myFont
 openWindowButton.pack(pady=7, padx=5)
 
+def tasks():
+
+    global tasktext
+    task = Toplevel()
+    
+    tasktext = StringVar()
+
+    task.geometry('400x300')
+    task.title("Tasks")
+    Label(task, text = "Tasks", font="Arial 20").pack()
+
+    Entry(task, textvariable=tasktext).pack()
+    Button(task, text="Save", command=ExecuteTask).pack()
+
+
+def ExecuteTask():
+        tasktext = StringVar()
+        
+        c.execute("INSERT INTO tasks VALUES (:task)",
+        {
+            'task' : tasktext.get(),
+        }
+    )
+        print("Saved!")
 
 
 main.mainloop()
