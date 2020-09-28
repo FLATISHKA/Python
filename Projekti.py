@@ -15,19 +15,35 @@ myFont = font.Font(family='Arial', size=20)
 labelTop = Label(main, text="Task List")
 labelTop['font'] = myFont
 labelTop.pack()
+def AccountID():
+    global AccoID
+
+    c.execute('SELECT ID FROM accounts where username = ?', (username.get(),))
+    for AccoID in c:
+        AccoID = int(AccoID[0])
+        
+
+    #if c.fetchone():
+    #    print('Found')
+    #    accid = c.fetchone()
+    #    print(accid)
+    #else:
+    #    print('Not found')
+
+
 
 def acco():
     conn = sqlite3.connect('data.db')
 
     c = conn.cursor()
 
-    c.execute("SELECT * FROM tasks")
+    c.execute("SELECT * FROM accounts")
     records=c.fetchall()
 
     print_records = ""
 
     for record in records:
-        print_records += str(record[0]) + " \t " + str(record[1]) + "\n"
+        print_records += str(record[0]) + " \t " + str(record[1]) + " \t " + str(record[2]) + "\n"
 
     print(print_records)
 
@@ -43,6 +59,7 @@ def login():
     c.execute(find_user,[(username.get()), (password.get())])
     result = c.fetchall()
     if result:
+        AccountID()
         IN = Label(log, text="You are in!", fg="green")
         IN.pack()
         tasks()
@@ -86,15 +103,17 @@ with sqlite3.connect('data.db') as db:
 
 AccTable = '''CREATE TABLE if not exists accounts(
         ID integer PRIMARY KEY,
-         username text not null,
-          password text not null
-          )'''
+        username text not null,
+        password text not null
+        )'''
 
 TaskTable = '''CREATE TABLE if not exists tasks (
         acctask integer NOT NULL,
-         FOREIGN KEY (acctask)
-          REFERENCES accounts(ID)
-          )'''
+        taskname varchar(20),
+        task varchar(100),
+        FOREIGN KEY (acctask)
+        REFERENCES accounts(ID)
+        )'''
 
 c.execute(AccTable)
 c.execute(TaskTable)
@@ -113,7 +132,7 @@ def singup():
     else:
         print("Success")
         
-        c.execute("INSERT INTO accounts VALUES (:username, :password)",
+        c.execute("INSERT INTO accounts (username, password) VALUES (:username, :password)",
             {
                 'username' : n_username.get(),
                 'password' : n_password.get()
@@ -167,7 +186,6 @@ def tasks():
     global tasktext
     global task
     task = Toplevel()
-    
     tasktext = StringVar()
 
     task.geometry('400x300')
@@ -176,24 +194,32 @@ def tasks():
     Button(task, text="Edit", command=edit).grid(row=1)
     Label(task, text="-TASK NAME").grid(row=4, columnspan=6)
     Label(task, text="TASK ENTRY").grid(row=5, columnspan=6)
-
+    Button(task, text="show id", command=AccountID).grid(row=6, column=7)
+    
 def edit():
     Button(task, text="Save", command=SaveTask).grid(row=1, column=1)
     Button(task, text="Delete").grid(row=1, column=2)
     Button(task, text="Add Task", command=NewTask).grid(row=1, column=3)
 
 def NewTask():
+    global taskname
+    global textentry
+    taskname = StringVar()
+    textentry = StringVar()
+    
     Label(task, text="Task Name:", pady=3).grid(row=2, columnspan=4)
-    Entry(task, width=25).grid(row=2, column=4)
+    Entry(task, width=25, textvariable=taskname).grid(row=2, column=4)
     Label(task, text="Task Entry:").grid(row=3, columnspan=4)
-    entry=Text(task, width=25, height=4)
-    entry.grid(row=3, column=4)
+    textentry = Text(task, width=25, height=4)
+    textentry.grid(row=3, column=4)
+    
 def SaveTask():
-        tasktext = StringVar()
         
-        c.execute("INSERT INTO tasks VALUES (:task)",
+        c.execute("INSERT INTO tasks (taskname, task, acctask) VALUES (:taskname, :task, :acctask)",
         {
-            'task' : tasktext.get(),
+            'taskname' : taskname.get(),
+            'task' : textentry.get(1.0, END),
+            'acctask' : AccoID
         }
     )
         print("Saved!")
