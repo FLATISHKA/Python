@@ -21,16 +21,6 @@ def AccountID():
     c.execute('SELECT ID FROM accounts where username = ?', (username.get(),))
     for AccoID in c:
         AccoID = int(AccoID[0])
-        
-
-    #if c.fetchone():
-    #    print('Found')
-    #    accid = c.fetchone()
-    #    print(accid)
-    #else:
-    #    print('Not found')
-
-
 
 def acco():
     conn = sqlite3.connect('data.db')
@@ -188,17 +178,36 @@ def tasks():
     task = Toplevel()
     tasktext = StringVar()
 
-    task.geometry('400x300')
+    task.geometry('500x400')
     task.title("Tasks")
 
+<<<<<<< HEAD
     Button(task, text="Edit", command=edit).grid(row=1)
     Label(task, text="-TASK NAME").grid(row=4, columnspan=6)
     Label(task, text="TASK ENTRY").grid(row=5, columnspan=6)
     
 def edit():
+=======
+    Button(task, text="Edit").grid(row=1)
+>>>>>>> 1dceed85ea9757c8df234c5925f240a9ccbd0264
     Button(task, text="Save", command=SaveTask).grid(row=1, column=1)
     Button(task, text="Delete").grid(row=1, column=2)
     Button(task, text="Add Task", command=NewTask).grid(row=1, column=3)
+    Button(task, text="Print Tasks", command=TaskQuery).grid(row=1, column=4)
+    Text(task, width=25, height=4).grid(row=2, rowspan=5, column=5)
+    
+    SelectOption = [
+        ("selection1", "YKSI"),
+        ("selection2", "KAKSI"),
+        ("selection3", "KOLME"),
+        ("selection4", "NELJA"),
+    ]
+
+    choices = StringVar()
+    choices.set("selection1")
+
+    for text, mode in SelectOption:
+        Radiobutton(task, text=text, variable=choices, value=mode).grid(columnspan=3)
 
 def NewTask():
     global taskname
@@ -223,5 +232,15 @@ def SaveTask():
     )
         print("Saved!")
 
+def TaskQuery():
+    c.execute('SELECT *, oid FROM tasks where acctask = ?', (AccoID,))
+    records=c.fetchall()
+
+    print_records = ''
+
+    for record in records:
+        print_records += str(record[0]) + " \t " + str(record[1]) + " \t " + str(record[2]) + " \t " + str(record[3])+ "\n"
+    print(print_records)
+    db.commit()
 
 main.mainloop()
