@@ -5,29 +5,25 @@ class Database:
     def __init__(self, db):
         self.conn = sqlite3.connect(db)
         self.cur = self.conn.cursor()
-        self.cur.execute(
-            "CREATE TABLE IF NOT EXISTS parts (id INTEGER PRIMARY KEY, part text, customer text, retailer text, price text)")
-        self.conn.commit()
 
-    def fetch(self):
-        self.cur.execute("SELECT * FROM parts")
+    def fetch(self, acctask):
+        self.cur.execute("SELECT *, oid FROM tasks where acctask=?", (acctask,))
         rows = self.cur.fetchall()
         return rows
 
-    def insert(self, part, customer, retailer, price):
-        self.cur.execute("INSERT INTO parts VALUES (NULL, ?, ?, ?, ?)",
-                         (part, customer, retailer, price))
+    def insert(self, acctask, taskname, task):
+        self.cur.execute("INSERT INTO tasks VALUES (?, ?, ?)",
+                        (acctask, taskname, task))
         self.conn.commit()
 
-    def remove(self, id):
-        self.cur.execute("DELETE FROM parts WHERE id=?", (id,))
+    def remove(self, acctask):
+        self.cur.execute("DELETE FROM tasks WHERE acctask=?",  (acctask))
         self.conn.commit()
 
-    def update(self, id, part, customer, retailer, price):
-        self.cur.execute("UPDATE parts SET part = ?, customer = ?, retailer = ?, price = ? WHERE id = ?",
-                         (part, customer, retailer, price, id))
+    def update(self, acctask, taskname, task):
+        self.cur.execute("UPDATE tasks SET taskname = ?, task = ? WHERE acctask = ? AND oid=?",
+                        (acctask, taskname, task))
         self.conn.commit()
 
     def __del__(self):
         self.conn.close()
-

@@ -4,6 +4,7 @@ import tkinter.font as font
 import sqlite3
 from tkinter import messagebox
 import random
+from db import Database
 
 
 main = Tk()
@@ -50,9 +51,9 @@ def login():
     result = c.fetchall()
     if result:
         AccountID()
+        TaskWindow()
         IN = Label(log, text="You are in!", fg="green")
         IN.pack()
-        tasks()
         IN.after(3000, IN.destroy)
     else:
         OUT = Label(log, text="The account does not exist.", fg="red")
@@ -171,76 +172,107 @@ openWindowButton = Button(main, text="Sing Up", command=signup_ui, width=15, fon
 openWindowButton['font'] = myFont
 openWindowButton.pack(pady=7, padx=5)
 
-def tasks():
+###########################################################
+db = Database('data.db')
 
-    global tasktext
-    global task
-    task = Toplevel()
-    tasktext = StringVar()
 
-    task.geometry('500x400')
-    task.title("Tasks")
+def populate_list():
+    parts_list.delete(0, END)
+    for row in db.fetch(AccoID):
+        parts_list.insert(END, row)
 
-<<<<<<< HEAD
-    Button(task, text="Edit", command=edit).grid(row=1)
-    Label(task, text="-TASK NAME").grid(row=4, columnspan=6)
-    Label(task, text="TASK ENTRY").grid(row=5, columnspan=6)
-    
-def edit():
-=======
-    Button(task, text="Edit").grid(row=1)
->>>>>>> 1dceed85ea9757c8df234c5925f240a9ccbd0264
-    Button(task, text="Save", command=SaveTask).grid(row=1, column=1)
-    Button(task, text="Delete").grid(row=1, column=2)
-    Button(task, text="Add Task", command=NewTask).grid(row=1, column=3)
-    Button(task, text="Print Tasks", command=TaskQuery).grid(row=1, column=4)
-    Text(task, width=25, height=4).grid(row=2, rowspan=5, column=5)
-    
-    SelectOption = [
-        ("selection1", "YKSI"),
-        ("selection2", "KAKSI"),
-        ("selection3", "KOLME"),
-        ("selection4", "NELJA"),
-    ]
 
-    choices = StringVar()
-    choices.set("selection1")
+def add_item():
+    if taskname_text.get() == '' or task_text.get() == '':
+        messagebox.showerror('Required Fields', 'Please include all fields')
+        return
+    db.insert(AccoID, taskname_text.get(), task_text.get())
+    parts_list.delete(0, END)
+    parts_list.insert(END, (taskname_text.get(), task_text.get()))
+    clear_text()
+    populate_list()
 
-    for text, mode in SelectOption:
-        Radiobutton(task, text=text, variable=choices, value=mode).grid(columnspan=3)
 
-def NewTask():
-    global taskname
-    global textentry
-    taskname = StringVar()
-    textentry = StringVar()
-    
-    Label(task, text="Task Name:", pady=3).grid(row=2, columnspan=4)
-    Entry(task, width=25, textvariable=taskname).grid(row=2, column=4)
-    Label(task, text="Task Entry:").grid(row=3, columnspan=4)
-    textentry = Text(task, width=25, height=4)
-    textentry.grid(row=3, column=4)
-    
-def SaveTask():
+def select_item(event):
+    try:
+        global selected_item
         
-        c.execute("INSERT INTO tasks (taskname, task, acctask) VALUES (:taskname, :task, :acctask)",
-        {
-            'taskname' : taskname.get(),
-            'task' : textentry.get(1.0, END),
-            'acctask' : AccoID
-        }
-    )
-        print("Saved!")
+        index = parts_list.curselection()[0]
+        selected_item = parts_list.get(index)
 
-def TaskQuery():
-    c.execute('SELECT *, oid FROM tasks where acctask = ?', (AccoID,))
-    records=c.fetchall()
+        taskname_entry.delete(0, END)
+        taskname_entry.insert(END, selected_item[1])
+        task_entry.delete(0, END)
+        task_entry.insert(END, selected_item[2])
+    except IndexError:
+        pass
 
-    print_records = ''
 
-    for record in records:
-        print_records += str(record[0]) + " \t " + str(record[1]) + " \t " + str(record[2]) + " \t " + str(record[3])+ "\n"
-    print(print_records)
-    db.commit()
+def remove_item():
+    db.remove(selected_item[0])
+    clear_text()
+    populate_list()
 
+
+def update_item():
+    db.update(selected_item[3], AccoID, taskname_text.get(), task_text.get())
+    populate_list()
+
+
+def clear_text():
+    taskname_entry.delete(0, END)
+    task_entry.delete(0, END)
+
+def TaskWindow():
+    task = Toplevel()
+    task.title('TASKSSSSS')
+    task.geometry('500x350')
+    global taskname_entry
+    global taskname_text
+    global task_entry
+    global task_text 
+    global parts_list
+
+    # Parts
+    taskname_text = StringVar()
+    taskname_label = Label(task, text='Task:', font=('bold', 14), pady=20)
+    taskname_label.grid(row=0, column=0, sticky=W)
+    taskname_entry = Entry(task, textvariable=taskname_text)
+    taskname_entry.grid(row=0, column=1)
+    # Customer
+    task_text = StringVar()
+    task_label = Label(task, text='Text:', font=('bold', 14))
+    task_label.grid(row=0, column=2, sticky=W)
+    task_entry = Entry(task, textvariable=task_text)
+    task_entry.grid(row=0, column=3)
+    # Parts List (Listbox)
+    parts_list = Listbox(task, height=8, width=50, border=0)
+    parts_list.grid(row=3, column=0, columnspan=3, rowspan=6, pady=20, padx=20)
+    # Create scrollbar
+    scrollbar = Scrollbar(task)
+    scrollbar.grid(row=3, column=3)
+    # Set scroll to listbox
+    parts_list.configure(yscrollcommand=scrollbar.set)
+    scrollbar.configure(command=parts_list.yview)
+    # Bind select
+    parts_list.bind('<<ListboxSelect>>', select_item)
+
+    # Buttons
+    add_btn = Button(task, text='Add Part', width=12, command=add_item)
+    add_btn.grid(row=2, column=0, pady=20)
+
+    remove_btn = Button(task, text='Remove Part', width=12, command=remove_item)
+    remove_btn.grid(row=2, column=1)
+
+    update_btn = Button(task, text='Update Part', width=12, command=update_item)
+    update_btn.grid(row=2, column=2)
+
+    clear_btn = Button(task, text='Clear Input', width=12, command=clear_text)
+    clear_btn.grid(row=2, column=3)
+
+
+    # Populate data
+    populate_list()
+
+# Start program
 main.mainloop()
