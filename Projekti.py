@@ -194,7 +194,6 @@ def tasks():
     Button(task, text="Edit", command=edit).grid(row=1)
     Label(task, text="-TASK NAME").grid(row=4, columnspan=6)
     Label(task, text="TASK ENTRY").grid(row=5, columnspan=6)
-    Button(task, text="show id", command=AccountID).grid(row=6, column=7)
     
 def edit():
     Button(task, text="Save", command=SaveTask).grid(row=1, column=1)
