@@ -16,13 +16,13 @@ class Database:
                         (acctask, taskname, task))
         self.conn.commit()
 
-    def remove(self, acctask):
-        self.cur.execute("DELETE FROM tasks WHERE acctask=?",  (acctask))
+    def remove(self, TaskSelect):
+        self.cur.execute("DELETE FROM tasks WHERE taskname=?",  (TaskSelect,))
         self.conn.commit()
 
-    def update(self, acctask, taskname, task):
-        self.cur.execute("UPDATE tasks SET taskname = ?, task = ? WHERE acctask = ? AND oid=?",
-                        (acctask, taskname, task))
+    def update(self, TaskSelect, taskname, task):
+        self.cur.execute("UPDATE tasks SET taskname = ?, task = ? WHERE taskname = ?",
+                        (taskname, task, TaskSelect))
         self.conn.commit()
 
     def __del__(self):

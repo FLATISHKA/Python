@@ -41,6 +41,24 @@ def acco():
     conn.commit()
     conn.close()
 
+def taskprint():
+    conn = sqlite3.connect('data.db')
+
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM tasks")
+    records=c.fetchall()
+
+    print_records = ""
+
+    for record in records:
+        print_records += str(record[0]) + " \t " + str(record[1]) + " \t " + str(record[2]) + "\n"
+
+    print(print_records)
+
+    conn.commit()
+    conn.close()
+
 
 def login():
     with sqlite3.connect('data.db') as db:
@@ -82,7 +100,8 @@ def login_ui():
     entry_password.pack()
 
     Button(log, text="Log In", command=login,).pack(pady=7)
-    Button(log, text="Accounts", command=acco).pack()
+    Button(log, text="Accounts", command=acco, state=DISABLED).pack()
+    Button(log, text="Tasks", command=taskprint, state=DISABLED).pack()
 
 openWindowButton = Button(main, text="Log In", command=login_ui, width=15, font="Arial 20")
 openWindowButton['font'] = myFont
@@ -196,6 +215,7 @@ def add_item():
 def select_item(event):
     try:
         global selected_item
+        global TaskSelect
         
         index = parts_list.curselection()[0]
         selected_item = parts_list.get(index)
@@ -204,18 +224,20 @@ def select_item(event):
         taskname_entry.insert(END, selected_item[1])
         task_entry.delete(0, END)
         task_entry.insert(END, selected_item[2])
+        TaskSelect = selected_item[1]
     except IndexError:
         pass
 
 
 def remove_item():
-    db.remove(selected_item[0])
+    # SelectedTask = parts_list.get(ANCHOR)
+    db.remove(TaskSelect)
     clear_text()
     populate_list()
 
 
 def update_item():
-    db.update(selected_item[3], AccoID, taskname_text.get(), task_text.get())
+    db.update(TaskSelect, taskname_text.get(), task_text.get())
     populate_list()
 
 
@@ -226,7 +248,7 @@ def clear_text():
 def TaskWindow():
     task = Toplevel()
     task.title('TASKSSSSS')
-    task.geometry('500x350')
+    task.geometry('700x350')
     global taskname_entry
     global taskname_text
     global task_entry
