@@ -1,5 +1,5 @@
+# imports
 import sqlite3
-
 
 class Database:
     def __init__(self, db):
@@ -10,16 +10,17 @@ class Database:
         self.cur.execute("SELECT *, oid FROM tasks where acctask=?", (acctask,))
         rows = self.cur.fetchall()
         return rows
-
+    # Add's new task
     def insert(self, acctask, taskname, task):
         self.cur.execute("INSERT INTO tasks VALUES (?, ?, ?)",
                         (acctask, taskname, task))
         self.conn.commit()
 
+    # Delete's selected Task 
     def remove(self, TaskSelect):
         self.cur.execute("DELETE FROM tasks WHERE taskname=?",  (TaskSelect,))
         self.conn.commit()
-
+    # Update's selected task
     def update(self, TaskSelect, taskname, task):
         self.cur.execute("UPDATE tasks SET taskname = ?, task = ? WHERE taskname = ?",
                         (taskname, task, TaskSelect))
