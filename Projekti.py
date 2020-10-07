@@ -100,8 +100,8 @@ def login_ui():
     entry_password.pack()
 
     Button(log, text="Log In", command=login,).pack(pady=7)
-    Button(log, text="Accounts", command=acco, state=DISABLED).pack()
-    Button(log, text="Tasks", command=taskprint, state=DISABLED).pack()
+    Button(log, text="Accounts", command=acco).pack()
+    Button(log, text="Tasks", command=taskprint).pack()
 
 openWindowButton = Button(main, text="Log In", command=login_ui, width=15, font="Arial 20")
 openWindowButton['font'] = myFont
@@ -137,9 +137,14 @@ def singup():
     find_user=("SELECT * FROM accounts where username=?")
     c.execute(find_user,[(n_username.get())])
     if c.fetchall():
-        messagebox.showinfo('user','already available')
+        OUT=Label(reg, text="Account already exist", fg="red")
+        OUT.pack()
+        OUT.after(3000, OUT.destroy)
         print("error")
     else:
+        IN=Label(reg, text="Account created", fg="green")
+        IN.pack()
+        IN.after(3000, IN.destroy)
         print("Success")
         
         c.execute("INSERT INTO accounts (username, password) VALUES (:username, :password)",
@@ -168,6 +173,7 @@ def singup():
 def signup_ui():
     global n_username
     global n_password
+    global reg
     reg = Toplevel()
 
     reg.geometry('300x200')
