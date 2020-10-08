@@ -156,19 +156,6 @@ def singup():
         
         db.commit()
         db.close()
-        #insert = 'INSERT INTO accounts(username, password)values(?, ?)'
-        
-        #c1.execute(insert,[(n_username.get()),(n_password.get())])
-        #try:
-        #    with sqlite3.connect('data.db') as db:
-        #        c = db.cursor()
-             
-        #    c.execute("create table user if not exists user(username text not null, primary key,password text not null)")
-        #    db.commit()
-        #    db.close()
-        #    db1.commit()
-        #except:
-        #    print("not processed")
 
 def signup_ui():
     global n_username
