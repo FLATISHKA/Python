@@ -100,8 +100,8 @@ def login_ui():
     entry_password.pack()
 
     Button(log, text="Log In", command=login,).pack(pady=7)
-    Button(log, text="Accounts", command=acco).pack()
-    Button(log, text="Tasks", command=taskprint).pack()
+    Button(log, text="Accounts", command=acco, state=DISABLED).pack()
+    Button(log, text="Tasks", command=taskprint, state=DISABLED).pack()
 
 openWindowButton = Button(main, text="Log In", command=login_ui, width=15, font="Arial 20")
 openWindowButton['font'] = myFont
@@ -273,13 +273,13 @@ def TaskWindow():
     parts_list.bind('<<ListboxSelect>>', select_item)
 
     # Buttons
-    add_btn = Button(task, text='Add Part', width=12, command=add_item)
+    add_btn = Button(task, text='Add Task', width=12, command=add_item)
     add_btn.grid(row=2, column=0, pady=20)
 
-    remove_btn = Button(task, text='Remove Part', width=12, command=remove_item)
+    remove_btn = Button(task, text='Remove Task', width=12, command=remove_item)
     remove_btn.grid(row=2, column=1)
 
-    update_btn = Button(task, text='Update Part', width=12, command=update_item)
+    update_btn = Button(task, text='Update Task', width=12, command=update_item)
     update_btn.grid(row=2, column=2)
 
     clear_btn = Button(task, text='Clear Input', width=12, command=clear_text)
