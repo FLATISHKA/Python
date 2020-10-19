@@ -5,7 +5,7 @@ class Database:
     def __init__(self, db):
         self.conn = sqlite3.connect(db)
         self.cur = self.conn.cursor()
-
+    #Shows accounts tasks that you are logged in
     def fetch(self, acctask):
         self.cur.execute("SELECT *, oid FROM tasks where acctask=?", (acctask,))
         rows = self.cur.fetchall()

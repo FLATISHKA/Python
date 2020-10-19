@@ -1,12 +1,14 @@
+# Importing libraries
 from tkinter import *
 from tkinter import messagebox
 import tkinter.font as font
 import sqlite3
 from tkinter import messagebox
 import random
+# Importing db.py file with shortcut's
 from db import Database
 
-
+# Main window
 main = Tk()
 main.title("Account")
 
@@ -16,13 +18,14 @@ myFont = font.Font(family='Arial', size=20)
 labelTop = Label(main, text="Task List")
 labelTop['font'] = myFont
 labelTop.pack()
+# Getting Accout ID from Accounts table
 def AccountID():
     global AccoID
 
     c.execute('SELECT ID FROM accounts where username = ?', (username.get(),))
     for AccoID in c:
         AccoID = int(AccoID[0])
-
+# Printing all Accounts from accouts table
 def acco():
     conn = sqlite3.connect('data.db')
 
@@ -40,7 +43,7 @@ def acco():
 
     conn.commit()
     conn.close()
-
+# Printing all tasks from tasks table
 def taskprint():
     conn = sqlite3.connect('data.db')
 
@@ -59,11 +62,11 @@ def taskprint():
     conn.commit()
     conn.close()
 
-
+# Login
 def login():
     with sqlite3.connect('data.db') as db:
         c = db.cursor()
-    
+    # Checks if account already exist, and if not it opens a task window
     find_user=("SELECT * FROM accounts where username=? and password = ?")
     c.execute(find_user,[(username.get()), (password.get())])
     result = c.fetchall()
@@ -77,7 +80,7 @@ def login():
         OUT = Label(log, text="The account does not exist.", fg="red")
         OUT.pack()
         OUT.after(3000, OUT.destroy)
-
+# Login window
 def login_ui():
     global username
     global password
@@ -98,25 +101,29 @@ def login_ui():
     label_username.pack()
     entry_password = Entry(log, textvariable=password, width = 25, show="*")
     entry_password.pack()
-
+    # Login Buttons
     Button(log, text="Log In", command=login,).pack(pady=7)
     Button(log, text="Accounts", command=acco, state=DISABLED).pack()
     Button(log, text="Tasks", command=taskprint, state=DISABLED).pack()
+<<<<<<< HEAD
 
+=======
+# Main window login button
+>>>>>>> 5dedca96e787383567402e9b16052df2b35e4abb
 openWindowButton = Button(main, text="Log In", command=login_ui, width=15, font="Arial 20")
 openWindowButton['font'] = myFont
 openWindowButton.pack(padx=5)
-
+# Connects SQL file
 with sqlite3.connect('data.db') as db:
     c = db.cursor()
 
-
+#Creating Accounts table
 AccTable = '''CREATE TABLE if not exists accounts(
         ID integer PRIMARY KEY,
         username text not null,
         password text not null
         )'''
-
+#creating Tasks table
 TaskTable = '''CREATE TABLE if not exists tasks (
         acctask integer NOT NULL,
         taskname varchar(20),
@@ -128,12 +135,12 @@ TaskTable = '''CREATE TABLE if not exists tasks (
 c.execute(AccTable)
 c.execute(TaskTable)
 db.commit
-
+# Singup
 def singup():
     print(n_username.get(),"\n",n_password.get())
     with sqlite3.connect('data.db') as db:
         c = db.cursor()
-    
+    # Checks if account already exist and if not it creates a new one
     find_user=("SELECT * FROM accounts where username=?")
     c.execute(find_user,[(n_username.get())])
     if c.fetchall():
@@ -146,7 +153,7 @@ def singup():
         IN.pack()
         IN.after(3000, IN.destroy)
         print("Success")
-        
+        # Inserting singup entry username and password into accounts table
         c.execute("INSERT INTO accounts (username, password) VALUES (:username, :password)",
             {
                 'username' : n_username.get(),
@@ -156,13 +163,13 @@ def singup():
         
         db.commit()
         db.close()
-
+# Singup window
 def signup_ui():
     global n_username
     global n_password
     global reg
-    reg = Toplevel()
 
+    reg = Toplevel()
     reg.geometry('300x200')
     reg.title("SignUp Form")
     n_username = StringVar()
@@ -180,21 +187,23 @@ def signup_ui():
 
     Button(reg, text="Sign Up", command= singup).pack(pady=7)
 
+# Main screen singup button
 openWindowButton = Button(main, text="Sing Up", command=signup_ui, width=15, font="Arial 20")
 openWindowButton['font'] = myFont
 openWindowButton.pack(pady=7, padx=5)
 
-###########################################################
+##############################   Task window and commands ###################################
 db = Database('data.db')
 
-
+# Accounts all Tasks
 def populate_list():
     parts_list.delete(0, END)
     for row in db.fetch(AccoID):
         parts_list.insert(END, row)
 
-
+# Adds items that was writed in entry
 def add_item():
+    # If entry is clear it asks you to include all fields
     if taskname_text.get() == '' or task_text.get() == '':
         messagebox.showerror('Required Fields', 'Please include all fields')
         return
@@ -204,7 +213,7 @@ def add_item():
     clear_text()
     populate_list()
 
-
+# Selected item
 def select_item(event):
     try:
         global selected_item
@@ -221,26 +230,26 @@ def select_item(event):
     except IndexError:
         pass
 
-
+# Removes selected item
 def remove_item():
-    # SelectedTask = parts_list.get(ANCHOR)
     db.remove(TaskSelect)
     clear_text()
     populate_list()
 
-
+# Updates selected item
 def update_item():
     db.update(TaskSelect, taskname_text.get(), task_text.get())
     populate_list()
 
-
+# Clears all entrys
 def clear_text():
     taskname_entry.delete(0, END)
     task_entry.delete(0, END)
 
+# Task Window
 def TaskWindow():
     task = Toplevel()
-    task.title('TASKSSSSS')
+    task.title('Tasks')
     task.geometry('700x350')
     global taskname_entry
     global taskname_text
@@ -248,19 +257,19 @@ def TaskWindow():
     global task_text 
     global parts_list
 
-    # Parts
+    # Task
     taskname_text = StringVar()
     taskname_label = Label(task, text='Task:', font=('bold', 14), pady=20)
     taskname_label.grid(row=0, column=0, sticky=W)
     taskname_entry = Entry(task, textvariable=taskname_text)
     taskname_entry.grid(row=0, column=1)
-    # Customer
+    # Task text
     task_text = StringVar()
     task_label = Label(task, text='Text:', font=('bold', 14))
     task_label.grid(row=0, column=2, sticky=W)
     task_entry = Entry(task, textvariable=task_text)
     task_entry.grid(row=0, column=3)
-    # Parts List (Listbox)
+    # Task List (Listbox)
     parts_list = Listbox(task, height=8, width=50, border=0)
     parts_list.grid(row=3, column=0, columnspan=3, rowspan=6, pady=20, padx=20)
     # Create scrollbar
@@ -291,3 +300,19 @@ def TaskWindow():
 
 # Start program
 main.mainloop()
+"""
+.             ##########         ##########
+.           ##############     ##############
+.          ###################################
+.          ###################################
+.          ###################################
+.           ################################
+.             ############################
+.               #########################
+.                 #####################
+.                    ###############
+.                      ###########
+.                         #####
+.
+.                Kiitos Mira Opetuksesta!
+"""
